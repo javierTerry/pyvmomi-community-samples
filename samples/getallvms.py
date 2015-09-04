@@ -18,12 +18,18 @@
 Python program for listing the vms on an ESX / vCenter host
 """
 
+from __future__ import print_function
 import atexit
 
 from pyVim import connect
 from pyVmomi import vmodl
 
 import tools.cli as cli
+import warnings
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
+warnings.filterwarnings("ignore")
 
 
 def print_vm_info(virtual_machine, depth=1):
@@ -43,30 +49,22 @@ def print_vm_info(virtual_machine, depth=1):
             print_vm_info(c, depth + 1)
         return
 
-    summary = virtual_machine.summary
-    print "Name       : ", summary.config.name
-    print "Path       : ", summary.config.vmPathName
-    print "Guest      : ", summary.config.guestFullName
-    print "Instance UUID : ", summary.config.instanceUuid
-    print "Bios UUID     : ", summary.config.uuid
-    annotation = summary.config.annotation
-    if annotation:
-        print "Annotation : ", annotation
-    print "State      : ", summary.runtime.powerState
-    if summary.guest is not None:
-        ip_address = summary.guest.ipAddress
-        tools_version = summary.guest.toolsStatus
-        if tools_version is not None:
-            print "VMware-tools: ", tools_version
-        else:
-            print "Vmware-tools: None"
-        if ip_address:
-            print "IP         : ", ip_address
-        else:
-            print "IP         : None"
-    if summary.runtime.question is not None:
-        print "Question  : ", summary.runtime.question.text
-    print ""
+
+    try:
+        summary = virtual_machine.summary
+        vmdata = {}
+        vmdata["name"] = summary.config.name
+        vmdata["ipaddr"] = summary.guest.ipAddress
+        vmdata["uuid"] = summary.config.instanceUuid
+        vmdata["state"] = summary.runtime.powerState
+        vmdata["host"] = summary.runtime.host.name
+        vmdata["os"] = summary.guest.guestFullName
+        print(vmdata)
+
+
+    except AttributeError:
+        pass
+
 
 
 def main():
@@ -99,7 +97,7 @@ def main():
                 print_vm_info(virtual_machine, 10)
 
     except vmodl.MethodFault as error:
-        print "Caught vmodl fault : " + error.msg
+        print("Caught vmodl fault : ")
         return -1
 
     return 0
