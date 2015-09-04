@@ -9,6 +9,7 @@ associated devices
 import argparse
 import atexit
 import json
+import ssl
 
 from pyVim import connect
 from pyVmomi import vmodl
@@ -16,6 +17,7 @@ from pyVmomi import vim
 
 from tools import cli
 
+ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_args():
     """
