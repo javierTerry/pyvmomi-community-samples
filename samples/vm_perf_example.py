@@ -18,14 +18,15 @@ from tools import cli
 from pyVim.connect import SmartConnectNoSSL, Disconnect
 import atexit
 import getpass
+import ssl
 
 
 def main():
 
     args = cli.get_args()
-
     # Connect to the host without SSL signing
     try:
+		
         si = SmartConnectNoSSL(
             host=args.host,
             user=args.user,

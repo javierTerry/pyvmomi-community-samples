@@ -11,6 +11,7 @@ import argparse
 import atexit
 import getpass
 import datetime
+import ssl
 
 from pyVim import connect
 from pyVmomi import vmodl
@@ -64,13 +65,17 @@ def main():
     """
    Simple command-line program demonstrating vSphere perfManager API
    """
+    sslContext = None
+    sslContext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+    sslContext.verify_mode = ssl.CERT_NONE
 
     args = get_args()
     try:
         service_instance = connect.SmartConnect(host=args.host,
                                                 user=args.user,
                                                 pwd=args.password,
-                                                port=int(args.port))
+                                                port=int(args.port),
+                                                sslContext=sslContext)
         if not service_instance:
             print("Could not connect to the specified host using specified "
                   "username and password")

@@ -56,7 +56,9 @@ def print_vm_info(virtual_machine):
             print("IP         : None")
     if summary.runtime.question is not None:
         print("Question  : ", summary.runtime.question.text)
+    print(summary.runtime.bootTime)
     print("")
+    
 
 
 def main():
@@ -67,10 +69,15 @@ def main():
     args = cli.get_args()
 
     try:
+
+        import ssl
+        context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        context.verify_mode = ssl.CERT_NONE
         service_instance = connect.SmartConnect(host=args.host,
                                                 user=args.user,
                                                 pwd=args.password,
-                                                port=int(args.port))
+                                                port=int(args.port),
+                                                sslContext=context)
 
         atexit.register(connect.Disconnect, service_instance)
 

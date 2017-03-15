@@ -18,6 +18,7 @@ This module implements simple helper functions for python samples
 """
 import argparse
 import getpass
+import ssl
 
 __author__ = "VMware, Inc."
 
@@ -57,6 +58,7 @@ def build_arg_parser():
                         required=False,
                         action='store',
                         help='Password to use when connecting to host')
+    
     return parser
 
 
@@ -78,5 +80,8 @@ def get_args():
     parser = build_arg_parser()
 
     args = parser.parse_args()
-
+    sslContext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+    sslContext.verify_mode = ssl.CERT_NONE
+    args.sslContext = sslContext
+    
     return prompt_for_password(args)
